@@ -898,6 +898,28 @@ async function deleteChat(id, evt){
   }
   renderSidebarChats();
 }
+
+async function notifyAnswerReady(){
+  try {
+    if(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications){
+      const LN = window.Capacitor.Plugins.LocalNotifications;
+      const perm = await LN.checkPermissions();
+      if(perm.display !== 'granted'){
+        const req = await LN.requestPermissions();
+        if(req.display !== 'granted') return;
+      }
+      await LN.schedule({
+        notifications: [{
+          title: 'ECLIPSEVEX AI',
+          body: 'Your answer is ready.',
+          id: Date.now() % 2147483647,
+          schedule: { at: new Date(Date.now() + 200) }
+        }]
+      });
+    }
+  } catch(e){ console.warn('Notification failed:', e); }
+}
+
 let activeChatId = null;
 let messages     = [];
 let isWaiting    = false;
@@ -1677,7 +1699,7 @@ async function sendMessage(skipBuildCheck){
       lbF.innerHTML='';
       const cur=document.createElement('span'); cur.className='tw-cursor'; lbF.appendChild(cur);
       const words=aiText.split(' '); let wi=0;
-      (function nw(){ if(wi<words.length){ lbF.insertBefore(document.createTextNode((wi?'':'')+words[wi++]),cur); container.scrollTop=container.scrollHeight; setTimeout(nw,35+Math.random()*25); } else { cur.remove(); renderMarkdownInto(lbF, aiText); } })();
+      (function nw(){ if(wi<words.length){ lbF.insertBefore(document.createTextNode((wi?'':'')+words[wi++]),cur); container.scrollTop=container.scrollHeight; setTimeout(nw,35+Math.random()*25); } else { cur.remove(); renderMarkdownInto(lbF, aiText); notifyAnswerReady(); } })();
     }
     renderSidebarChats(); isWaiting=false; resetSendButton();
   } else {
@@ -1791,7 +1813,7 @@ async function sendMessage(skipBuildCheck){
           lb2.innerHTML='';
           const cur=document.createElement('span'); cur.className='tw-cursor'; lb2.appendChild(cur);
           const words=aiText.split(' '); let wi=0;
-          (function nw(){ if(wi<words.length){ lb2.insertBefore(document.createTextNode((wi?'':'')+words[wi++]),cur); container.scrollTop=container.scrollHeight; setTimeout(nw,35+Math.random()*25); } else { cur.remove(); renderMarkdownInto(lb2, aiText); } })();
+          (function nw(){ if(wi<words.length){ lb2.insertBefore(document.createTextNode((wi?'':'')+words[wi++]),cur); container.scrollTop=container.scrollHeight; setTimeout(nw,35+Math.random()*25); } else { cur.remove(); renderMarkdownInto(lb2, aiText); notifyAnswerReady(); } })();
         }
       }
     }
