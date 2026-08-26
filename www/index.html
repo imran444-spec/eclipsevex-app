@@ -342,6 +342,37 @@ footer{padding:40px 24px;border-top:1px solid var(--border2)}
 .user-info{flex:1;overflow:hidden}
 .user-name{font-weight:600;font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .user-plan{font-size:.72rem;color:var(--fg3)}
+.settings-overlay{position:fixed;inset:0;background:rgba(4,4,15,.75);backdrop-filter:blur(4px);z-index:999;display:none;align-items:flex-end;justify-content:center}
+[data-theme="light"] .settings-overlay{background:rgba(26,26,62,.4)}
+.settings-overlay.open{display:flex}
+.settings-panel{background:var(--bg);width:100%;max-width:480px;height:92dvh;border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -8px 40px var(--shadow);animation:settingsUp .25s ease}
+@keyframes settingsUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
+.settings-header{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border2);flex-shrink:0}
+.settings-header h2{font-family:var(--raj);font-size:1.1rem;font-weight:700;letter-spacing:.02em}
+.settings-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px;-webkit-overflow-scrolling:touch}
+.settings-account-card{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.settings-account-email{font-size:.85rem;color:var(--fg);word-break:break-all}
+.settings-plan-badge{background:var(--fg);color:var(--bg);font-size:.7rem;font-weight:700;padding:4px 10px;border-radius:999px;flex-shrink:0;margin-left:10px}
+.settings-upgrade-card{background:linear-gradient(135deg,var(--violet),var(--cyan));border-radius:14px;padding:16px;color:#04040f}
+.settings-upgrade-title{font-family:var(--raj);font-weight:700;font-size:1rem;margin-bottom:4px}
+.settings-upgrade-sub{font-size:.8rem;opacity:.85;margin-bottom:12px}
+.settings-upgrade-btn{background:#04040f;color:#fff;border:none;padding:9px 18px;border-radius:999px;font-size:.82rem;font-weight:600}
+.settings-group{background:var(--surface);border:1px solid var(--border2);border-radius:14px;overflow:hidden}
+.settings-item{display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;border-bottom:1px solid var(--border2);transition:background .15s}
+.settings-item:last-child{border-bottom:none}
+.settings-item:active{background:var(--surface2)}
+.settings-item-icon{width:20px;height:20px;flex-shrink:0;color:var(--fg2);display:flex;align-items:center;justify-content:center}
+.settings-item-icon svg{width:18px;height:18px}
+.settings-item-text{flex:1;min-width:0}
+.settings-item-title{font-size:.88rem;color:var(--fg);font-weight:500}
+.settings-item-sub{font-size:.72rem;color:var(--fg3);margin-top:1px}
+.settings-item-chevron{width:16px;height:16px;color:var(--fg3);flex-shrink:0}
+.settings-toggle{width:42px;height:24px;border-radius:999px;background:var(--border);position:relative;cursor:pointer;flex-shrink:0;transition:background .2s}
+.settings-toggle.on{background:var(--violet)}
+.settings-toggle-knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .2s}
+.settings-toggle.on .settings-toggle-knob{left:20px}
+.settings-logout-btn{background:var(--surface);border:1px solid rgba(239,68,68,.3);color:#ef4444;border-radius:14px;padding:14px;text-align:center;font-size:.88rem;font-weight:600}
+
 .user-menu-btn{width:26px;height:26px;border-radius:7px;background:none;border:1px solid var(--border2);color:var(--fg3);display:flex;align-items:center;justify-content:center;transition:background .15s}
 .user-menu-btn:hover{background:var(--surface2)}
 
@@ -778,11 +809,114 @@ window.addEventListener('unhandledrejection', function(e){
           <div class="user-name" id="user-display-name">User</div>
           <div class="user-plan">Free Plan · 500K tokens</div>
         </div>
+        <button class="user-menu-btn" onclick="openSettings()" title="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+        </button>
         <button class="user-menu-btn" onclick="signOut()" title="Sign out">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:14px;height:14px"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </button>
       </div>
     </aside>
+
+    <div class="settings-overlay" id="settings-overlay" onclick="if(event.target===this)closeSettings()">
+      <div class="settings-panel">
+        <div class="settings-header">
+          <span style="width:32px"></span>
+          <h2>Settings</h2>
+          <button class="icon-btn" onclick="closeSettings()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width:16px;height:16px"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="settings-body">
+          <div class="settings-account-card">
+            <div class="settings-account-email" id="settings-email">user@example.com</div>
+            <div class="settings-plan-badge">Free</div>
+          </div>
+          <div class="settings-upgrade-card">
+            <div class="settings-upgrade-title">Want more tokens?</div>
+            <div class="settings-upgrade-sub">Upgrade for more usage and capabilities.</div>
+            <button class="settings-upgrade-btn" onclick="settingsComingSoon('Upgrade')">Upgrade</button>
+          </div>
+
+          <div class="settings-group">
+            <div class="settings-item" onclick="settingsComingSoon('Profile')">
+              <div class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div>
+              <div class="settings-item-text"><div class="settings-item-title">Profile</div></div>
+              <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+            <div class="settings-item" onclick="settingsComingSoon('Billing')">
+              <div class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 15a2.5 2.5 0 0 0 2.5 2h.5a2 2 0 0 0 0-4h-1a2 2 0 0 1 0-4h.5a2.5 2.5 0 0 1 2.5 2"/><line x1="12" y1="7" x2="12" y2="17"/></svg></div>
+              <div class="settings-item-text"><div class="settings-item-title">Billing</div></div>
+              <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <div class="settings-item" onclick="settingsComingSoon('Capabilities')">
+              <div class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></div>
+              <div class="settings-item-text"><div class="settings-item-title">Capabilities</div><div class="settings-item-sub">4 enabled</div></div>
+              <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+            <div class="settings-item" onclick="settingsComingSoon('Connectors')">
+              <div class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 3v6M15 3v6M6 9h12l-1 5a5 5 0 0 1-10 0Z"/><path d="M12 17v4"/></svg></div>
+              <div class="settings-item-text"><div class="settings-item-title">Connectors</div></div>
+              <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+            <div class="settings-item" onclick="openAppPermissions()">
+              <div class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/></svg></div>
+              <div class="settings-item-text"><div class="settings-item-title">Permissions</div></div>
+              <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <div class="settings-item" onclick="toggleTheme();document.getElementById('settings-color-mode-label').textContent=document.documentElement.getAttribute('data-theme')==='light'?'Light':'Dark'">
+              <div class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.5A9 9 0 1 1 11.5 3 7 7 0 0 0 21 12.5Z"/></svg></div>
+              <div class="settings-item-text"><div class="settings-item-title">Color mode</div><div class="settings-item-sub" id="settings-color-mode-label">Dark</div></div>
+              <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+            <div class="settings-item" onclick="settingsComingSoon('Font style')">
+              <div class="settings-item-icon" style="font-family:var(--raj);font-weight:700;font-size:.85rem">Aa</div>
+              <div class="settings-item-text"><div class="settings-item-title">Font style</div><div class="settings-item-sub">Default</div></div>
+              <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+            <div class="settings-item" onclick="settingsComingSoon('Voice')">
+              <div class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="10" x2="4" y2="14"/><line x1="8" y1="6" x2="8" y2="18"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="16" y1="6" x2="16" y2="18"/><line x1="20" y1="10" x2="20" y2="14"/></svg></div>
+              <div class="settings-item-text"><div class="settings-item-title">Voice</div></div>
+              <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <div class="settings-item" style="cursor:default">
+              <div class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div>
+              <div class="settings-item-text"><div class="settings-item-title">Haptic feedback</div></div>
+              <div class="settings-toggle on" id="haptic-toggle" onclick="toggleHaptic(event)"><div class="settings-toggle-knob"></div></div>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <div class="settings-item" onclick="settingsComingSoon('Time & focus')">
+              <div class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.5A9 9 0 1 1 11.5 3 7 7 0 0 0 21 12.5Z"/></svg></div>
+              <div class="settings-item-text"><div class="settings-item-title">Time & focus</div></div>
+              <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+            <div class="settings-item" onclick="settingsComingSoon('Privacy')">
+              <div class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2 4 5v6c0 5 3.5 8.5 8 11 4.5-2.5 8-6 8-11V5Z"/></svg></div>
+              <div class="settings-item-text"><div class="settings-item-title">Privacy</div></div>
+              <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+            <div class="settings-item" onclick="settingsComingSoon('Shared links')">
+              <div class="settings-item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg></div>
+              <div class="settings-item-text"><div class="settings-item-title">Shared links</div></div>
+              <svg class="settings-item-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </div>
+          </div>
+
+          <button class="settings-logout-btn" onclick="closeSettings();signOut()">Log out</button>
+        </div>
+      </div>
+    </div>
 
     <!-- CHAT MAIN -->
     <main class="chat-main">
@@ -897,6 +1031,29 @@ async function deleteChat(id, evt){
     document.getElementById('chat-welcome').style.display='flex';
   }
   renderSidebarChats();
+}
+
+function openSettings(){
+  const overlay = document.getElementById('settings-overlay');
+  const emailEl = document.getElementById('settings-email');
+  const nameEl = document.getElementById('user-display-name');
+  if(emailEl && nameEl && nameEl.textContent.trim()) emailEl.textContent = nameEl.textContent.trim();
+  const modeLabel = document.getElementById('settings-color-mode-label');
+  if(modeLabel) modeLabel.textContent = document.documentElement.getAttribute('data-theme') === 'light' ? 'Light' : 'Dark';
+  overlay.classList.add('open');
+}
+function closeSettings(){
+  document.getElementById('settings-overlay').classList.remove('open');
+}
+function toggleHaptic(e){
+  e.stopPropagation();
+  document.getElementById('haptic-toggle').classList.toggle('on');
+}
+function settingsComingSoon(name){
+  alert(name + ' — coming soon.');
+}
+function openAppPermissions(){
+  alert('To manage permissions, go to your device Settings > Apps > ECLIPSEVEX AI > Permissions.');
 }
 
 async function notifyAnswerReady(){
