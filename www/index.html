@@ -876,9 +876,19 @@ function persistChatHistory(){
   catch(e){ console.warn('Could not save chat history:', e); }
 }
 
-function deleteChat(id, evt){
+async function deleteChat(id, evt){
   if(evt) evt.stopPropagation();
-  if(!confirm('Delete this chat? This cannot be undone.')) return;
+  let confirmed = false;
+  if(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Dialog){
+    const result = await window.Capacitor.Plugins.Dialog.confirm({
+      title: 'Delete chat',
+      message: 'Delete this chat? This cannot be undone.'
+    });
+    confirmed = result.value;
+  } else {
+    confirmed = confirm('Delete this chat? This cannot be undone.');
+  }
+  if(!confirmed) return;
   chatHistory = chatHistory.filter(c => c.id !== id);
   persistChatHistory();
   if(activeChatId === id){
