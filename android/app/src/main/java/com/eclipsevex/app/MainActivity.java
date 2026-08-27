@@ -27,23 +27,29 @@ public class MainActivity extends BridgeActivity {
                 != PackageManager.PERMISSION_GRANTED) {
             permissionsNeeded.add(Manifest.permission.CAMERA);
         }
-        if (android.os.Build.VERSION.SDK_INT >= 33) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                    != PackageManager.PERMISSION_GRANTED) {
-                permissionsNeeded.add(Manifest.permission.POST_NOTIFICATIONS);
-            }
-        }
-
         if (!permissionsNeeded.isEmpty()) {
             ActivityCompat.requestPermissions(this,
                     permissionsNeeded.toArray(new String[0]),
                     PERMISSION_REQUEST_CODE);
         }
 
+        final WebChromeClient existingClient = this.bridge.getWebView().getWebChromeClient();
+
         this.bridge.getWebView().setWebChromeClient(new WebChromeClient() {
             @Override
             public void onPermissionRequest(final PermissionRequest request) {
                 runOnUiThread(() -> request.grant(request.getResources()));
+            }
+
+            @Override
+            public boolean onShowFileChooser(
+                    android.webkit.WebView webView,
+                    android.webkit.ValueCallback<android.net.Uri[]> filePathCallback,
+                    FileChooserParams fileChooserParams) {
+                if (existingClient != null) {
+                    return existingClient.onShowFileChooser(webView, filePathCallback, fileChooserParams);
+                }
+                return super.onShowFileChooser(webView, filePathCallback, fileChooserParams);
             }
         });
     }

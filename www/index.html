@@ -2979,6 +2979,25 @@ function sendFeedback(){
 
 
 
+async function maybePromptNotifications(){
+  try {
+    if(localStorage.getItem('evx-notify-prompted') === '1') return;
+    localStorage.setItem('evx-notify-prompted', '1');
+
+    if(!(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications)) return;
+    const LN = window.Capacitor.Plugins.LocalNotifications;
+
+    const existing = await LN.checkPermissions();
+    let display = existing.display;
+    if(display !== 'granted'){
+      const req = await LN.requestPermissions();
+      display = req.display;
+    }
+
+    localStorage.setItem('evx-notify-enabled', display === 'granted' ? '1' : '0');
+  } catch(e){ console.warn('Notification prompt failed:', e); }
+}
+
 async function notifyAnswerReady(){
   try {
     if(localStorage.getItem('evx-notify-enabled') !== '1') return;
@@ -2990,10 +3009,13 @@ async function notifyAnswerReady(){
       }
       await LN.schedule({
         notifications: [{
-          title: 'ECLIPSEVEX AI',
-          body: 'Your answer is ready.',
+          title: '✨ ECLIPSEVEX AI — Answer ready',
+          body: 'Your response has finished generating. Tap to view it.',
           id: Date.now() % 2147483647,
-          schedule: { at: new Date(Date.now() + 200) }
+          schedule: { at: new Date(Date.now() + 200) },
+          sound: 'default',
+          smallIcon: 'ic_stat_notify',
+          iconColor: '#7c3aed'
         }]
       });
     }
@@ -3796,6 +3818,8 @@ async function sendMessage(skipBuildCheck){
       ? `${text}\n\n[Attached file: ${textRef.name}]\n\`\`\`\n${textRef.content}\n\`\`\``
       : `[Attached file: ${textRef.name}]\n\`\`\`\n${textRef.content}\n\`\`\``;
   }
+
+  maybePromptNotifications();
 
   const container = document.getElementById('chat-messages');
   const welcome   = document.getElementById('chat-welcome');
