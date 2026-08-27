@@ -2981,12 +2981,12 @@ function sendFeedback(){
 
 async function notifyAnswerReady(){
   try {
+    if(localStorage.getItem('evx-notify-enabled') !== '1') return;
     if(window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications){
       const LN = window.Capacitor.Plugins.LocalNotifications;
       const perm = await LN.checkPermissions();
       if(perm.display !== 'granted'){
-        const req = await LN.requestPermissions();
-        if(req.display !== 'granted') return;
+        return; // user enabled the setting but hasn't granted OS permission yet — don't force a prompt mid-chat
       }
       await LN.schedule({
         notifications: [{
