@@ -1924,17 +1924,9 @@ do_replace(
 #     HELP CENTER / FEEDBACK
 # ============================================================
 
-js_anchor = '''function openConnectorsInfo(){
-  openSettingsModal(`
-    <button class="settings-modal-close" onclick="closeSettingsModal()">&times;</button>
-    <h3>Connectors</h3>
-    <p style="font-size:.85rem;color:var(--fg3);line-height:1.5">
-      No connectors are configured. Connecting real services (Drive, Slack, etc.)
-      requires OAuth credentials and a token exchange on your server —
-      this can't be turned on from the app alone.
-    </p>
-  `);
-}'''
+_m = list(re.finditer(r'function openConnectorsInfo\(\)\{.*?\n\}', content, re.DOTALL))
+assert len(_m) == 1, f"[js-new-functions] found {len(_m)} matches for openConnectorsInfo"
+js_anchor = _m[0].group(0)
 
 js_add = js_anchor + """
 
