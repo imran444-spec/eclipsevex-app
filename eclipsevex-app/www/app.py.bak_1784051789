@@ -1,0 +1,111 @@
+from flask import Response, stream_with_context, Flask, request, jsonify, render_template
+import os, json, sys
+sys.path.insert(0, '/root/ECLIPSEVEX-AI')
+os.chdir('/root/ECLIPSEVEX-AI')
+app = Flask(__name__, template_folder='templates', static_folder='static')
+from flask_cors import CORS
+CORS(app)
+app.secret_key = os.environ.get('SECRET_KEY', 'eclipsevex-secret')
+from core.hybrid_engine import HybridEngine
+engine = HybridEngine()
+
+@app.route('/api/chat/stream', methods=['POST'])
+def chat_stream():
+    import json as _json
+    data = request.get_json(force=True, silent=True) or {}
+    message = (data.get('message') or '').strip()
+    history = data.get('history') or []
+    if not message:
+        return jsonify({'error': 'No message'}), 400
+    from core.hybrid_engine import STATUS_PREFIX
+    def generate():
+        try:
+            for token in engine.answer_stream(message, history=history):
+                if token.startswith(STATUS_PREFIX):
+                    status_text = token[len(STATUS_PREFIX):]
+                    yield f"data: {_json.dumps({'status': status_text})}\n\n"
+                else:
+                    yield f"data: {_json.dumps({'t': token})}\n\n"
+        except Exception as e:
+            yield f"data: {_json.dumps({'t': 'Error. Please try again.'})}\n\n"
+        yield f"data: {_json.dumps({'done': True})}\n\n"
+    return Response(stream_with_context(generate()),
+                    mimetype='text/event-stream',
+                    headers={'Cache-Control':'no-cache','X-Accel-Buffering':'no'})
+
+@app.route('/api/health')
+def health():
+    return jsonify({'status': 'ok'})
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    data = request.get_json(force=True, silent=True) or {}
+    message = (data.get('message') or '').strip()
+    history = data.get('history') or []
+    if not message:
+        return jsonify({'error': 'No message'}), 400
+    try:
+        reply, source = engine.answer(message, history=history)
+        return jsonify({'reply': reply, 'source': source})
+    except Exception as e:
+        return jsonify({'reply': 'Error. Please try again.', 'source': 'error'}), 500
+@app.route('/chat', methods=['POST'])
+def chat_file():
+    message = request.form.get('message', '').strip()
+    try:
+        history = json.loads(request.form.get('history', '[]'))
+    except Exception:
+        history = []
+    if request.files.get('image'):
+        return jsonify({'reply': 'Image received. What would you like to know about it?', 'source': 'vision'})
+    if not message:
+        return jsonify({'error': 'No message'}), 400
+    try:
+        reply, source = engine.answer(message, history=history)
+        return jsonify({'reply': reply, 'source': source})
+    except Exception as e:
+        return jsonify({'reply': 'Error. Please try again.', 'source': 'error'}), 500
+@app.route('/')
+def index():
+    resp = app.make_response(render_template('index.html'))
+    resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    resp.headers['Pragma'] = 'no-cache'
+    return resp
+
+import requests as req_lib
+from flask import request, jsonify, send_file
+import io, os
+
+@app.route('/api/generate_image', methods=['POST'])
+def generate_image():
+    data = request.get_json()
+    prompt = data.get('prompt', '')
+    seed = data.get('seed', 42)
+    url = f"https://image.pollinations.ai/prompt/{req_lib.utils.quote(prompt)}?width=768&height=768&seed={seed}&nologo=true"
+    resp = req_lib.get(url, timeout=60)
+    if resp.status_code == 200:
+        return send_file(io.BytesIO(resp.content), mimetype='image/jpeg')
+    return jsonify({'error': 'Generation failed'}), 500
+
+import re as _re_dl
+
+@app.route('/api/download_apk/<build_id>', methods=['GET'])
+def download_apk(build_id):
+    # build_id must be exactly the 8-char hex uuid prefix build_apk_v2 generates
+    # -- reject anything else to prevent path traversal.
+    if not _re_dl.fullmatch(r'[0-9a-f]{8}', build_id):
+        return jsonify({'error': 'Invalid build id'}), 400
+    apk_path = os.path.join(
+        '/root/ECLIPSEVEX-AI/builds', build_id,
+        'app/build/outputs/apk/debug/app-debug.apk'
+    )
+    if not os.path.isfile(apk_path):
+        return jsonify({'error': 'APK not found'}), 404
+    return send_file(
+        apk_path,
+        mimetype='application/vnd.android.package-archive',
+        as_attachment=True,
+        download_name=f'app-{build_id}.apk'
+    )
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=False)
